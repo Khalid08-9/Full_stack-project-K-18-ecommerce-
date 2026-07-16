@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  firstName String
+  lastName  String
+  addresses Address[]
+  orders    Order[]
+}
+
+model Address {
+  id      String @id @default(uuid())
+  label   String
+  street  String
+  city    String
+  state   String
+  zip     String
+  country String
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+}
+
+model Product {
+  id            String      @id @default(uuid())
+  name          String
+  slug          String      @unique
+  category      String
+  price         Float
+  originalPrice Float?
+  description   String
+  details       String[]
+  images        String[]
+  sizes         String[]
+  inStock       Boolean     @default(true)
+  tag           String?
+  isNew         Boolean     @default(false)
+  colors        Color[]
+  orderItems    OrderItem[]
+}
+
+model Color {
+  id        String   @id @default(uuid())
+  name      String
+  hex       String
+  images    String[]
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Order {
+  id             String      @id @default(uuid())
+  date           DateTime    @default(now())
+  status         String      @default("Processing")
+  total          Float
+  trackingNumber String?
+  userId         String
+  user           User        @relation(fields: [userId], references: [id])
+  items          OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  name      String
+  image     String
+  color     String
+  size      String
+  quantity  Int
+  price     Float
+  orderId   String
+  productId String
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
