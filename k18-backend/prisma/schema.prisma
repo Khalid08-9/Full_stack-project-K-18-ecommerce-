@@ -8,13 +8,17 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  password  String
-  firstName String
-  lastName  String
-  addresses Address[]
-  orders    Order[]
+  id                      String    @id @default(uuid())
+  email                   String    @unique
+  password                String
+  firstName               String
+  lastName                String
+  emailVerified           Boolean   @default(false)
+  // Hashed 6-digit verification code + its expiry (email-verify at signup).
+  verificationCode        String?
+  verificationCodeExpires DateTime?
+  addresses               Address[]
+  orders                  Order[]
 }
 
 model Address {

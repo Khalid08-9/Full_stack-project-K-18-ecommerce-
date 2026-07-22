@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../lib/Prisma";
+import { sendOrderConfirmation } from "../lib/emails";
 
 const router = Router();
 
@@ -55,6 +56,15 @@ router.post("/", async (req, res) => {
     },
     include: { items: true }
   });
+
+  // Fire the confirmation email. Guarded so a mail failure never fails the
+  // order — the order is already committed at this point.
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (user?.email) await sendOrderConfirmation(user.email, order);
+  } catch (err) {
+    console.error("[order] confirmation email failed:", err);
+  }
 
   res.status(201).json(order);
 });
